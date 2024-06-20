@@ -36,7 +36,7 @@ export default function PokemonLookupPage() {
         value={pokemon}
         onChange={(e) => setPokemon(e.target.value)} />
 
-      <button type="submit" enabled={!data.isPending()}>Search for Pokemon</button>
+      <button type="submit" disabled={data.isPending()}>Search for Pokemon</button>
     </form>
 
     {searchResult}
