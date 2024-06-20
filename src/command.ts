@@ -13,6 +13,24 @@ type CommandResult<T> = [
   () => void,
 ]
 
+/**
+ * Create a Command. A Command is a method that you can pass to an event handler
+ * like onClick which runs an asynchronous operation (like fetch) in the background,
+ * then returns a result. You can think of it as a `usePromise` that generates its
+ * result when an event handler happens.
+ * 
+ * Commands are guaranteed to be debounced (i.e. only one invocation can be live at
+ * a time)
+ *
+ * @param block - the asynchronous command to run in the background
+ * @param deps - the dependencies for the Command, similar to `useEffect`.
+ * @param runOnStart - if true, the Command will be invoked automatically when
+ *                     the component is initially mounted or when the `deps` change
+ * @return an array of three values:
+ *    invoke => Invokes the action, call this in an event handler
+ *    current => The result of the last Command invocation
+ *    reset => Resets the action to its unset value
+ */
 export function useCommand<T>(
   block: () => Promise<T>,
   deps: React.DependencyList,
@@ -61,6 +79,18 @@ export function useCommand<T>(
   )
 }
 
+/**
+ * Create a debounced callback that will only run one instance of the block at 
+ * a time. If the block is already running, the callback will return the pending
+ * invocation's Promise.
+ * 
+ * You probably don't need this method and want useCommand instead, it is included
+ * just in case it might be useful
+ *
+ * @param block - the callback to memoize
+ * @param deps - the dependencies for the callback, similar to useEffect
+ * @return - a memoized debounced callback
+ */
 export function useAsyncCallbackDedup<T>(
   block: () => Promise<T>,
   deps: React.DependencyList,
