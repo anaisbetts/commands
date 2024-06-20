@@ -2,6 +2,8 @@
 
 Commands are a new primitive for writing React components that invoke asynchronous methods easily. If you've ever tried to write a bunch of ugly useEffect/useState code to manage onClicks, this is much better and easier!
 
+Commands also automatically ensure that only one invocation of the method is running concurrently, and makes it really easy to write pending and error states.
+
 Here's an example:
 
 ```tsx
@@ -30,7 +32,9 @@ export default function PokemonLookupPage() {
 
   return (<main>
     <form onSubmit={doSearch}>
-      <input type="text" onChange={(e) => setPokemon(e.target.value)} />
+      <input type="text" 
+        value={pokemon}
+        onChange={(e) => setPokemon(e.target.value)} />
 
       <button type="submit" enabled={!data.isPending()}>Search for Pokemon</button>
     </form>
