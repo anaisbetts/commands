@@ -37,11 +37,19 @@ export abstract class Result<T> {
   }
 
   isUndefined() {
-    return this.mapOrElse(
-      () => false,
-      () => false,
-      (x) => x === undefined,
-    )
+    return this.mapOrElse({
+      err: () => false,
+      pending: () => false,
+      ok: (x) => x === undefined,
+    })
+  }
+
+  okOr(val: T, filterNullish: boolean = false) {
+    return this.mapOrElse({
+      err: () => val,
+      pending: () => val,
+      ok: (x) => (filterNullish && !x ? val : x),
+    })
   }
 
   expect(): T {
@@ -60,11 +68,6 @@ export abstract class Result<T> {
     return this.err()!
   }
 
-  contains(val: T): boolean {
-    if (!this.isOk()) return false
-    return this.expect() === val
-  }
-
   map<N>(fn: (val: T) => N): Result<N> {
     if (this.isErr()) {
       return Result.err<N>(this.expectErr())
@@ -77,41 +80,27 @@ export abstract class Result<T> {
     return Result.ok(fn(this.expect()))
   }
 
-  mapOrElse<N>(
-    orElse: (err: any) => N,
-    orPending: () => N,
-    fn: (val: T) => N,
-  ): N {
+  mapOrElse<N>(ops: {
+    err?: (err: any) => N,
+    pending?: () => N,
+    ok?: (val: T) => N,
+  }): N | undefined {
     if (this.isPending()) {
-      return orPending()
+      return ops.pending ? ops.pending() : undefined
     }
 
     if (this.isErr()) {
-      return orElse(this.expectErr())
+      return ops.err ? ops.err(this.expectErr()) : undefined
     }
 
-    return fn(this.expect())
+    return ops.ok ? ops.ok(this.expect()) : undefined
   }
 
-  mapErr(fn: (val: any) => any): Result<T> {
+  mapErr(fn: (error: any) => any): Result<T> {
     if (this.isOk()) return Result.ok<T>(this.expect())
     if (this.isPending()) return Result.pending<T>()
 
     return Result.err(fn(this.expectErr()))
-  }
-
-  and<N>(res: Result<N>): Result<N> {
-    if (this.isPending()) return Result.pending<N>()
-    return this.isOk() ? res : Result.err<N>(this.expectErr())
-  }
-
-  andThen<N>(res: (val: T) => Result<N>): Result<N> {
-    if (this.isPending()) return Result.pending<N>()
-    return this.isOk() ? res(this.expect()) : Result.err(this.expectErr())
-  }
-
-  or(res: Result<T>): Result<T> {
-    return this.isErr() ? res : this
   }
 }
 
