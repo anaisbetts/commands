@@ -1,6 +1,6 @@
 {
   "name": "@anaisbetts/commands",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0",
   "private": false,
   "scripts": {
     "build": "git clean -xdf ./dist && tsc && cp -R src/* dist/",
