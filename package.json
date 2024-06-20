@@ -1,13 +1,14 @@
 {
   "name": "@anaisbetts/commands",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "private": false,
   "scripts": {
-    "build": "git clean -xdf ./dist && tsc && cp src/* dist/",
+    "build": "git clean -xdf ./dist && tsc && cp -R src/* dist/",
     "prepare": "npm run build",
     "test:watch": "jest --watch",
     "test": "jest --ci"
   },
+  "main": "dist/index.js",
   "dependencies": {
     "react": "^18",
     "rxjs": "^7.8.1"
