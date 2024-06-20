@@ -84,6 +84,7 @@ export abstract class Result<T> {
     err?: (err: any) => N,
     pending?: () => N,
     ok?: (val: T) => N,
+    null?: (val: T) => N,
   }): N | undefined {
     if (this.isPending()) {
       return ops.pending ? ops.pending() : undefined
@@ -93,7 +94,10 @@ export abstract class Result<T> {
       return ops.err ? ops.err(this.expectErr()) : undefined
     }
 
-    return ops.ok ? ops.ok(this.expect()) : undefined
+    const ret = this.expect()
+    const fn = ret ? ops.ok : (ops.null ?? ops.ok)
+
+    return fn ? fn(ret) : undefined
   }
 
   mapErr(fn: (error: any) => any): Result<T> {
