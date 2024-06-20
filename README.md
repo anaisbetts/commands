@@ -1,5 +1,9 @@
 ## Commands - a React Hooks library for writing async code
 
+```sh
+npm i -S @anaisbetts/commands
+```
+
 Commands are a new primitive for writing React components that invoke asynchronous methods easily. If you've ever tried to write a bunch of ugly useEffect/useState code to manage onClicks, this is much better and easier!
 
 Commands also automatically ensure that only one invocation of the method is running concurrently, and makes it really easy to write pending and error states.
