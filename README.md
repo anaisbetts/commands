@@ -6,38 +6,38 @@ Here's an example:
 
 ```tsx
 export default function PokemonLookupPage() {
-	const [pokemon, setPokemon] = useState("")
+  const [pokemon, setPokemon] = useState("")
 
-	const [doSearch, data] = useCommand(async () => {
-		if (!pokemon || pokemon.length < 3) {
-			return []
-		}
+  const [doSearch, data] = useCommand(async () => {
+    if (!pokemon || pokemon.length < 3) {
+      return []
+    }
 
-		return await fetchPokemonByName(pokemon)
-	}, [pokemon]);
+    return await fetchPokemonByName(pokemon)
+  }, [pokemon]);
 
-	// Map our pending result to React content
-	const searchResult = data.mapOrElse({
-		ok: (results) = (<>
-			<h2>Pokemon found!</h2>
-			<ul>
-				{results.map(r => <li>{r.Name} - {r.Information}</li>)}
-			</ul>
-			</>),
-		err: (e) => <h2>Failed to fetch Pokemon!</h2>,
-		pending: () => <h2>Searching...</h2>
-	})
+  // Map our pending result to React content
+  const searchResult = data.mapOrElse({
+    ok: (results) = (<>
+      <h2>Pokemon found!</h2>
+      <ul>
+        {results.map(r => <li>{r.Name} - {r.Information}</li>)}
+      </ul>
+      </>),
+    err: (e) => <h2>Failed to fetch Pokemon!</h2>,
+    pending: () => <h2>Searching...</h2>
+  })
 
-	return (<main>
-		<form onSubmit={doSearch}>
-			<input type="text" onChange={(e) => setPokemon(e.target.value)} />
+  return (<main>
+    <form onSubmit={doSearch}>
+      <input type="text" onChange={(e) => setPokemon(e.target.value)} />
 
-			<button type="submit" enabled={!data.isPending()}>Search for Pokemon</button>
-		</form>
+      <button type="submit" enabled={!data.isPending()}>Search for Pokemon</button>
+    </form>
 
-		{searchResult}
+    {searchResult}
 
-	</main>
+  </main>
 }
 ```
 
