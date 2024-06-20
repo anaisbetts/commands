@@ -2,21 +2,21 @@ import React, { useEffect } from 'react'
 import { Subject, firstValueFrom, take } from 'rxjs'
 
 import { act, render, screen } from '@testing-library/react'
-import { useAction } from '../action'
+import { useCommand } from '../command'
 import { unawaited } from '../utility'
 
 import '@testing-library/jest-dom'
 
-describe('useAction', () => {
+describe('useCommand', () => {
   let callCount = 0
   beforeEach(() => (callCount = 0))
 
-  const ActionComponent: React.FC<{
+  const CommandComponent: React.FC<{
     invoker: Subject<boolean>
     resultGate?: Subject<boolean>
     resetter?: Subject<boolean>
   }> = ({ invoker, resultGate, resetter }) => {
-    const [invokeCommand, current, reset] = useAction(
+    const [invokeCommand, current, reset] = useCommand(
       async () => {
         callCount++
         if (resultGate) {
@@ -62,7 +62,7 @@ describe('useAction', () => {
   it('should update on item', async () => {
     const invoke = new Subject<boolean>()
 
-    render(<ActionComponent invoker={invoke} />)
+    render(<CommandComponent invoker={invoke} />)
 
     // Commands shouldn't invoke immediately, only when we call invokeCommand
     await expectNullString()
@@ -79,7 +79,7 @@ describe('useAction', () => {
     const invoke = new Subject<boolean>()
     const result = new Subject<boolean>()
 
-    render(<ActionComponent invoker={invoke} resultGate={result} />)
+    render(<CommandComponent invoker={invoke} resultGate={result} />)
 
     // Commands shouldn't invoke immediately, only when we call invokeCommand
     expect(await screen.findByText('null!')).toBeInTheDocument()
@@ -115,7 +115,7 @@ describe('useAction', () => {
     const invoke = new Subject<boolean>()
     const resetSubj = new Subject<boolean>()
 
-    render(<ActionComponent invoker={invoke} resetter={resetSubj} />)
+    render(<CommandComponent invoker={invoke} resetter={resetSubj} />)
 
     // Commands shouldn't invoke immediately, only when we call invokeCommand
     await expectNullString()

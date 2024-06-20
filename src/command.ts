@@ -4,8 +4,8 @@ import { Result } from './result'
 import { promiseFinally } from './utility'
 import { useMounted } from './utility-hooks'
 
-type ActionResult<T> = [
-  // InvokeAction => Invokes the action, call this in an event handler
+type CommandResult<T> = [
+  // InvokeCommand => Invokes the action, call this in an event handler
   (e?: FormEvent<HTMLFormElement>) => Promise<T | null>,
   // Result => The last result from the command invocation
   Result<T | null>,
@@ -13,11 +13,11 @@ type ActionResult<T> = [
   () => void,
 ]
 
-export function useAction<T>(
+export function useCommand<T>(
   block: () => Promise<T>,
   deps: React.DependencyList,
   runOnStart = false,
-): ActionResult<T> {
+): CommandResult<T> {
   const mounted = useMounted()
   const [current, setCurrent] = useState<Result<T | null>>(Result.ok(null))
 
