@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useMemo, useRef, useState } from 'react'
 import { usePromise } from './promise'
 import { Result } from './result'
-import { promiseFinally } from './utility'
+import { promiseFinally } from './promise'
 import { useMounted } from './utility-hooks'
 
 type CommandResult<T> = [

@@ -1,9 +1,9 @@
 {
-  "name": "commands",
-  "version": "0.1.0",
+  "name": "@anaisbetts/commands",
+  "version": "0.1.0-alpha.1",
   "private": false,
   "scripts": {
-    "build": "git clean -xdf ./dist && tsc",
+    "build": "git clean -xdf ./dist && tsc && cp src/* dist/",
     "prepare": "npm run build",
     "test:watch": "jest --watch",
     "test": "jest --ci"

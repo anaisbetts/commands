@@ -3,7 +3,7 @@ import { Subject, firstValueFrom, take } from 'rxjs'
 
 import { act, render, screen } from '@testing-library/react'
 import { useCommand } from '../command'
-import { unawaited } from '../utility'
+import { unawaited } from '../promise'
 
 import '@testing-library/jest-dom'
 

@@ -5,6 +5,9 @@ import {
   defer,
   firstValueFrom,
   from,
+  map,
+  mergeAll,
+  reduce,
   retry,
 } from 'rxjs'
 
@@ -140,4 +143,55 @@ export function timeout<T>(p: Promise<T> | null | undefined, timeout: number) {
 
 export function delay(ms: number) {
   return new Promise<void>((res) => setTimeout(res, ms))
+}
+
+export function unawaited<T>(p: Promise<T>) {
+  p.then((_) => {})
+}
+
+export function promiseFinally<T>(p: Promise<T>, block: () => unknown) {
+  return p.then(
+    (x) => {
+      block()
+      return Promise.resolve(x)
+    },
+    (e) => {
+      block()
+      return Promise.reject(e)
+    },
+  )
+}
+
+
+export function asyncMap<T, TRet>(
+  array: T[],
+  selector: (x: T) => Promise<TRet>,
+  maxConcurrency = 4
+): Promise<Map<T, TRet>> {
+  const promiseSelToObs = (k: T) =>
+    defer(() => from(selector(k)).pipe(map((v) => ({ k, v }))));
+
+  const ret = from(array).pipe(
+    map(promiseSelToObs),
+    mergeAll(maxConcurrency),
+    reduce<{ k: T; v: TRet }, Map<T, TRet>>((acc, kvp) => {
+      acc.set(kvp.k, kvp.v);
+      return acc;
+    }, new Map())
+  );
+
+  return firstValueFrom(ret);
+}
+
+export async function asyncReduce<T, TAcc>(
+  array: T[],
+  selector: (acc: TAcc, x: T) => TAcc,
+  seed: TAcc
+) {
+  let acc = seed;
+  for (const x of array) {
+    acc = await selector(acc, x);
+  }
+
+  return acc;
 }
