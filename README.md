@@ -30,6 +30,8 @@ export default function PokemonLookupPage() {
     pending: () => <h2>Searching...</h2>
   })
 
+  // NB: doSearch will automatically call preventDefault for us, we don't
+  // have to do this ourselves
   return (<main>
     <form onSubmit={doSearch}>
       <input type="text" 
