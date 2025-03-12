@@ -1,7 +1,6 @@
 import { FormEvent, useCallback, useMemo, useRef, useState } from 'react'
 import { usePromise } from './promise'
 import { Result } from './result'
-import { promiseFinally } from './promise'
 import { useMounted } from './utility-hooks'
 
 type CommandResult<T> = [
@@ -18,7 +17,7 @@ type CommandResult<T> = [
  * like onClick which runs an asynchronous operation (like fetch) in the background,
  * then returns a result. You can think of it as a `usePromise` that generates its
  * result when an event handler happens.
- * 
+ *
  * Commands are guaranteed to be debounced (i.e. only one invocation can be live at
  * a time)
  *
@@ -46,15 +45,20 @@ export function useCommand<T>(
   }, [mounted])
 
   const invokeCommand = useAsyncCallbackDedup(async () => {
+    let isCurrentInvocation = true
     try {
       if (mounted.current) setCurrent(Result.pending<T>())
       const ret = await block()
-      if (mounted.current) setCurrent(Result.ok(ret))
+      if (isCurrentInvocation && mounted.current) setCurrent(Result.ok(ret))
 
       return ret
     } catch (e) {
-      if (mounted.current) setCurrent(Result.err(e as Error))
+      if (isCurrentInvocation && mounted.current)
+        setCurrent(Result.err(e as Error))
       throw e
+    } finally {
+      // Mark this invocation as no longer active after it completes
+      isCurrentInvocation = false
     }
   }, deps)
 
@@ -80,10 +84,10 @@ export function useCommand<T>(
 }
 
 /**
- * Create a debounced callback that will only run one instance of the block at 
+ * Create a debounced callback that will only run one instance of the block at
  * a time. If the block is already running, the callback will return the pending
  * invocation's Promise.
- * 
+ *
  * You probably don't need this method and want useCommand instead, it is included
  * just in case it might be useful
  *
@@ -96,12 +100,29 @@ export function useAsyncCallbackDedup<T>(
   deps: React.DependencyList,
 ): () => Promise<T | null> {
   const cur = useRef<Promise<T>>()
+  const mounted = useMounted()
 
   const cb = useCallback(async () => {
     if (cur.current) return null
+    if (!mounted.current) return null
 
-    cur.current = block()
-    return await promiseFinally(cur.current, () => (cur.current = undefined))
+    const promise = block()
+    cur.current = promise
+
+    try {
+      const result = await promise
+      // Only clear current if this specific promise is still the current one
+      if (cur.current === promise) {
+        cur.current = undefined
+      }
+      return result
+    } catch (error) {
+      // Only clear current if this specific promise is still the current one
+      if (cur.current === promise) {
+        cur.current = undefined
+      }
+      throw error
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
