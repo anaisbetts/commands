@@ -17,10 +17,10 @@ import { useMounted } from './utility-hooks'
 /**
  * A React hook that consumes an RxJS Observable and returns its latest result
  *
- * @param block - A block that generates the Observable to Subscribe to. It will 
+ * @param block - A block that generates the Observable to Subscribe to. It will
  *                be called when the component is mounted or whenever deps change.
  * @param deps - the dependencies for the hook, similar to `useEffect`.
- * @return A Result that represents the latest value from the Observable, 
+ * @return A Result that represents the latest value from the Observable,
  *         initially set to the pending state until the Observable produces a value
  */
 export function useObservable<T>(
@@ -32,8 +32,9 @@ export function useObservable<T>(
 
   useEffect(() => {
     let d = Subscription.EMPTY
-    let set = false,
-      done = false
+    let set = false
+    let done = false
+    let isCurrentSubscription = true
     if (!mounted.current) {
       return () => {}
     }
@@ -41,20 +42,26 @@ export function useObservable<T>(
     try {
       d = block().subscribe({
         next: (x) => {
+          if (!isCurrentSubscription || !mounted.current) return
           set = true
-          if (mounted.current) setRet(Result.ok(x))
+          setRet(Result.ok(x))
         },
         error: (e) => {
+          if (!isCurrentSubscription || !mounted.current) return
           set = true
           done = true
-          if (mounted.current) {
-            setRet(Result.err(e))
-          }
+          setRet(Result.err(e))
         },
         complete: () => {
+          if (!isCurrentSubscription) return
           done = true
           Promise.resolve().then(() => {
-            if (ret.isPending() && !set) {
+            if (
+              isCurrentSubscription &&
+              mounted.current &&
+              ret.isPending() &&
+              !set
+            ) {
               setRet(
                 Result.err(
                   new Error('Observable must have at least one element'),
@@ -68,7 +75,10 @@ export function useObservable<T>(
       setRet(Result.err(e))
     }
 
-    return () => d.unsubscribe()
+    return () => {
+      isCurrentSubscription = false
+      d.unsubscribe()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
@@ -98,7 +108,7 @@ export function usePromise<T>(
  * signal cancellation
  *
  * @param block - the async method that creates the Promise
- * @return - an Observable representing the Promise. Unsubscribing from the 
+ * @return - an Observable representing the Promise. Unsubscribing from the
  *           Observable will set cancelled
  */
 export function fromCancellablePromise<T>(
@@ -138,7 +148,7 @@ export function fromCancellablePromise<T>(
 }
 /**
  * Retries a promise function a specified number of times.
- * 
+ *
  * @param func - The promise function to retry.
  * @param retries - The number of times to retry the function. Default is 3.
  * @returns A promise that resolves with the result of the function.
@@ -201,7 +211,7 @@ export function unawaited<T>(p: Promise<T>) {
 
 /**
  * Executes a block of code after a promise is settled, whether it is fulfilled or rejected.
- * 
+ *
  * @param p - The promise to be executed.
  * @param block - The block of code to be executed after the promise is settled.
  * @returns A new promise that resolves or rejects with the same value as the input promise.
@@ -219,9 +229,8 @@ export function promiseFinally<T>(p: Promise<T>, block: () => unknown) {
   )
 }
 
-
 /**
- * Maps an array of values to a new array of values using an asynchronous 
+ * Maps an array of values to a new array of values using an asynchronous
  * selector function.
  *
  * @param array - the input array to map through
@@ -232,28 +241,28 @@ export function promiseFinally<T>(p: Promise<T>, block: () => unknown) {
 export function asyncMap<T, TRet>(
   array: T[],
   selector: (x: T) => Promise<TRet>,
-  maxConcurrency = 4
+  maxConcurrency = 4,
 ): Promise<Map<T, TRet>> {
   const promiseSelToObs = (k: T) =>
-    defer(() => from(selector(k)).pipe(map((v) => ({ k, v }))));
+    defer(() => from(selector(k)).pipe(map((v) => ({ k, v }))))
 
   const ret = from(array).pipe(
     map(promiseSelToObs),
     mergeAll(maxConcurrency),
     reduce<{ k: T; v: TRet }, Map<T, TRet>>((acc, kvp) => {
-      acc.set(kvp.k, kvp.v);
-      return acc;
-    }, new Map())
-  );
+      acc.set(kvp.k, kvp.v)
+      return acc
+    }, new Map()),
+  )
 
-  return firstValueFrom(ret);
+  return firstValueFrom(ret)
 }
 
 /**
  * Like reduce, but each selected item is a Promise that is resolved
  *
  * @param array - the input array of values to fold over
- * @param selector - a selector that, given the current state and the new item, 
+ * @param selector - a selector that, given the current state and the new item,
  *                   will produce an asynchronous result
  * @param seed - the initial value for the accumulator
  * @return The reduced value
@@ -261,12 +270,12 @@ export function asyncMap<T, TRet>(
 export async function asyncReduce<T, TAcc>(
   array: T[],
   selector: (acc: TAcc, x: T) => TAcc,
-  seed: TAcc
+  seed: TAcc,
 ) {
-  let acc = seed;
+  let acc = seed
   for (const x of array) {
-    acc = await selector(acc, x);
+    acc = await selector(acc, x)
   }
 
-  return acc;
+  return acc
 }
