@@ -5,6 +5,7 @@
   "scripts": {
     "build": "git clean -xdf ./dist && tsc && cp -R src/* dist/",
     "prepublishOnly": "npm run build",
+    "fix": "prettier -w src/**/*",
     "test:watch": "jest --watch",
     "test": "jest --ci"
   },
