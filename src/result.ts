@@ -128,7 +128,7 @@ export abstract class Result<T> {
     return this.mapOrElse({
       err: () => val,
       pending: () => val,
-      ok: (x) => (filterNullish && !x ? val : x),
+      ok: (x) => (filterNullish && (x === null || x === undefined) ? val : x),
     })
   }
 

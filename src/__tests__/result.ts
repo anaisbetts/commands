@@ -79,10 +79,10 @@ describe('Result class', () => {
       expect(pending<number>().okOr(100)).toBe(100)
 
       // Test filterNullish
-      expect(ok(null).okOr(100, true)).toBe(100)
-      expect(ok(undefined).okOr(100, true)).toBe(100)
-      expect(ok(0).okOr(100, true)).toBe(100)
-      expect(ok('').okOr(100, true)).toBe(100)
+      expect(ok<number | null>(null).okOr(100, true)).toBe(100)
+      expect(ok<number | undefined>(undefined).okOr(100, true)).toBe(100)
+      expect(ok<number>(0).okOr(100, true)).toBe(0)
+      expect(ok<string | number>('').okOr(100, true)).toBe('')
       expect(ok(42).okOr(100, true)).toBe(42)
     })
 

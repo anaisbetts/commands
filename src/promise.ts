@@ -92,7 +92,7 @@ export function useObservable<T>(
  * 
  * @param block - A block that generates the Promise to Subscribe to. It will 
  *                be called when the component is mounted or whenever deps change.
-   @param deps?: React.DependencyList,
+ * @param deps - the dependencies for the hook, similar to `useEffect`.
  * @return A Result that represents the latest value from the Observable, 
  *         initially set to the pending state until the Observable produces a value
  */
@@ -269,7 +269,7 @@ export function asyncMap<T, TRet>(
  */
 export async function asyncReduce<T, TAcc>(
   array: T[],
-  selector: (acc: TAcc, x: T) => TAcc,
+  selector: (acc: TAcc, x: T) => Promise<TAcc>,
   seed: TAcc,
 ) {
   let acc = seed
