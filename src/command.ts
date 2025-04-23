@@ -1,4 +1,11 @@
-import { FormEvent, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  DependencyList,
+  FormEvent,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { usePromise } from './promise'
 import { Result } from './result'
 import { useMounted } from './utility-hooks'
@@ -127,4 +134,17 @@ export function useAsyncCallbackDedup<T>(
   }, deps)
 
   return cb
+}
+
+export function useResult<T, N>(
+  result: Result<T>,
+  ops: {
+    err?: (err: any) => N
+    pending?: () => N
+    ok?: (val: T) => N
+    null?: (val: T) => N
+  },
+  deps: DependencyList = [],
+) {
+  return useMemo(() => result.mapOrElse(ops), [result, ...deps])
 }
