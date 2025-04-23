@@ -31,7 +31,7 @@ export default function PokemonLookupPage() {
   }, [pokemon]);
 
   // Map our pending result to React content
-  const searchResult = data.mapOrElse({
+  const searchResult = useResult(data, {
     ok: (results) = (<>
       <h2>Pokemon found!</h2>
       <ul>
@@ -40,13 +40,13 @@ export default function PokemonLookupPage() {
       </>),
     err: (e) => <h2>Failed to fetch Pokemon!</h2>,
     pending: () => <h2>Searching...</h2>
-  })
+  }, [])
 
   // NB: doSearch will automatically call preventDefault for us, we don't
   // have to do this ourselves
   return (<main>
     <form onSubmit={doSearch}>
-      <input type="text" 
+      <input type="text"
         value={pokemon}
         onChange={(e) => setPokemon(e.target.value)} />
 
@@ -63,37 +63,37 @@ export default function PokemonLookupPage() {
 
 `Result` is the current result of a pending asynchronous operation, with states: Ok, Error, and Pending, similar to other languages like Kotlin and Rust's "Result" class
 
-* `ok` - Creates a Result object with a successful value.
-* `err` - Creates a Result object representing an error.
-* `pending` - Creates a pending Result.
-* `fromPromise` - Boxes a Promise into a Result, capturing errors into a Result.
+- `ok` - Creates a Result object with a successful value.
+- `err` - Creates a Result object representing an error.
+- `pending` - Creates a pending Result.
+- `fromPromise` - Boxes a Promise into a Result, capturing errors into a Result.
 
 ### Instance Methods
 
-* `isOk` - Checks if the result is Ok.
-* `isErr` - Checks if the result is an Error.
-* `isPending` - Checks if the result is Pending.
-* `ok` - Gets the value if the Result is Ok.
-* `err` - Gets the error if the result is an Error.
-* `isUndefined` - Checks if the Result is an undefined value.
-* `okOr` - Gets the Ok value or a default value if the result is not Ok.
-* `expect` - Expects the result to be Ok and returns the value, throwing if it is not.
-* `expectErr` - Expects the result to be an Error and returns the error, throwing if it is not.
-* `map` - Transforms the result by applying a function to the Ok value.
-* `mapOrElse` - Unboxes the Result by applying different functions based on the Result type.
-* `mapErr` - Transforms the result by applying a function to the Err value.
+- `isOk` - Checks if the result is Ok.
+- `isErr` - Checks if the result is an Error.
+- `isPending` - Checks if the result is Pending.
+- `ok` - Gets the value if the Result is Ok.
+- `err` - Gets the error if the result is an Error.
+- `isUndefined` - Checks if the Result is an undefined value.
+- `okOr` - Gets the Ok value or a default value if the result is not Ok.
+- `expect` - Expects the result to be Ok and returns the value, throwing if it is not.
+- `expectErr` - Expects the result to be an Error and returns the error, throwing if it is not.
+- `map` - Transforms the result by applying a function to the Ok value.
+- `mapOrElse` - Unboxes the Result by applying different functions based on the Result type.
+- `mapErr` - Transforms the result by applying a function to the Err value.
 
 ## What else does this do?
 
 This library is also a grab-bag of all the code I keep copy-pasting into different projects, but this time, it's all documented:
 
-* `useObservable` - A React hook that consumes an RxJS Observable and returns its latest result.
-* `usePromise` - A React hook that consumes a Promise and returns its latest result, respecting dependencies similar to useEffect.
-* `fromCancellablePromise` - Converts a Promise to an Observable, allowing the Promise handler to signal cancellation.
-* `retryPromise` - Retries a promise function a specified number of times.
-* `timeout` - Wraps a promise with a timeout.
-* `delay` - Delays the execution of a function by the specified number of milliseconds.
-* `unawaited` - Executes a promise without awaiting its resolution.
-* `promiseFinally` - Executes a block of code after a promise is settled, whether it is fulfilled or rejected.
-* `asyncMap` - Maps an array of values to a new array of values using an asynchronous selector function.
-* `asyncReduce` - Like reduce, but each selected item is a Promise that is resolved.
+- `useObservable` - A React hook that consumes an RxJS Observable and returns its latest result.
+- `usePromise` - A React hook that consumes a Promise and returns its latest result, respecting dependencies similar to useEffect.
+- `fromCancellablePromise` - Converts a Promise to an Observable, allowing the Promise handler to signal cancellation.
+- `retryPromise` - Retries a promise function a specified number of times.
+- `timeout` - Wraps a promise with a timeout.
+- `delay` - Delays the execution of a function by the specified number of milliseconds.
+- `unawaited` - Executes a promise without awaiting its resolution.
+- `promiseFinally` - Executes a block of code after a promise is settled, whether it is fulfilled or rejected.
+- `asyncMap` - Maps an array of values to a new array of values using an asynchronous selector function.
+- `asyncReduce` - Like reduce, but each selected item is a Promise that is resolved.
